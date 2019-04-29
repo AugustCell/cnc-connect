@@ -6,7 +6,7 @@ import email
 email = "os.services.updates@gmail.com"
 password = "cse363esc"
 SMTP_SERVER = "imap.gmail.com"
-SMTP_PORT = 587
+SMTP_PORT = 993
 
 def readEmail():
     try:
@@ -17,20 +17,21 @@ def readEmail():
         type, data = mail.search(None, 'ALL')
         mailId = data[0]
 
+        '''
         idList = mailId.split()
         firstEmail = int(idList[0])
-        latestEmail = int(idList[0])
-
-        for i in range(latestEmail,firstEmail, -1):
+        latestEmail = int(idList[-1])
+        '''
+        
+        for i in mailId.split():
             typ, data = mail.fetch(i, '(RFC822)' )
-
-            for response in data:
-                if isinstance(response, tuple):
-                    msg = email.message_from_string(response[1])
-                    subject = msg['subject']
-                    sender = msg['from']
-                    print ('From : ' + sender + '\n')
-                    print ('Subject : ' + subject + '\n')
+            msg = email.message_from_string(data[0][1])
+            subject = msg['subject']
+            sender = msg['from']
+            print ('From : ' + sender + '\n')
+            print ('Subject : ' + subject + '\n')
 
     except Exception as e:
         print (str(e))
+
+readEmail()
