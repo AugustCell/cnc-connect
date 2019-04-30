@@ -89,7 +89,7 @@ def receiveFile(com):
     splitCom = com.split(" ")
     del(splitCom[0])
     filePath = splitCom[0]
-    localPath = splitCom[1]   
+    localPath = splitCom[1]
     download_file(filePath, localPath)
 
 #EMAIL SUBJECT = execute [file path from dropbox with python script]
@@ -155,15 +155,8 @@ def periodicUpdates(seconds):
 
 periodicUpdates(30.0)
 
-<<<<<<< HEAD
-#Directories - show [Directory name]
-#Files - fetch [Absolute file path]
-#Commands - execute [commands]
-#Download -
-=======
 #KEYWORDS:
 #To send a file to user: download [filename] [local name]
 #To receive a file from user: fetch [file name]
 #To execute a python script from dropbox: execute [file path from dropbox with python script]
 #To receive directory information: show [Directory path]
->>>>>>> 8d88026cece393e1ff9ed1b91774c53288872578
