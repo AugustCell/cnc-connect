@@ -48,17 +48,17 @@ def upload_file(path):
     splitPath = path.split("/")
     dbxPath = "/" + splitPath[-1]
     print(dbxPath)
-    with open(path, 'rb') as f:
-        try:
+    try:
+        with open(path, 'rb') as f:
             dbx.files_upload(f.read(), '/' + str(id) + dbxPath)
             #SEND AN EMAIL AS RECEIPT OF EXECUTION
             execution_receipt = "Subject: Uploaded " + path + " from " + str(id) + " computer." + "\n\n"
             execution_receipt += "Successfuly uploaded file to dropbox"
             sendEmail(execution_receipt)
-        except:
-            execution_receipt = "Subject: Failed to upload " + path + " from " + str(id) + " computer." + "\n\n"
-            execution_receipt += "Unsuccessfuly uploaded file to dropbox"
-            sendEmail(execution_receipt)
+    except:
+        execution_receipt = "Subject: Failed to upload " + path + " from " + str(id) + " computer." + "\n\n"
+        execution_receipt += "Unsuccessfuly uploaded file to dropbox"
+        sendEmail(execution_receipt)
 
 #Download a file from dropbox
 def download_file(filePath, localName):
@@ -94,10 +94,12 @@ def showFiles(commandString):
     splitCommand = commandString.split(" ")
     del(splitCommand[0])
 
+    '''
     for x in range(len(splitCommand)):
         print("At element " + str(x) + " is " + splitCommand[x])
 
     print("This is length: " + str(len(splitCommand)))
+    '''
 
     if len(splitCommand) == 2:
         truePath = splitCommand[0]
