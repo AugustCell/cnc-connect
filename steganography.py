@@ -33,5 +33,3 @@ class Image:
 
     def get_payload_size(self, file_path):
         return os.path.getsize(file_path)*8
-
-        
