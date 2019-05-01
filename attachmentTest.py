@@ -35,3 +35,4 @@ def readEmail():
     mail.logout()
 
 #https://stackoverflow.com/questions/4067937/getting-mail-attachment-to-python-file-object
+https://pypi.org/project/Stegano/
