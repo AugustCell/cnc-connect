@@ -197,6 +197,7 @@ def readEmail():
     mail.select('inbox')
 
     typ, data = mail.search(None, 'ALL')
+    isBroadcast = False
     for i in data[0].split():
         typ, data = mail.fetch(i, '(RFC822)' )
         msg = email.message_from_bytes(data[0][1])
@@ -208,10 +209,14 @@ def readEmail():
                 commands.append(subject)
             elif("all" in subject):
                 commands.append(subject)
+                isBroadcast = True
 
     if commands:
        commandParser(commands)
 
+    if(isBroadcast):
+        mail.store(i, '+FLAGS', '\\Deleted')
+        time.sleep(15)
     mail.expunge()
     mail.close()
     mail.logout()
@@ -219,12 +224,12 @@ def readEmail():
 #Send an update every x seconds
 #Check email every x seconds
 def periodicUpdates(seconds):
-    startTime=time.time()
+    #startTime=time.time()
     while True:
         readEmail()
         message = "Subject: " + str(id) + "\n\n" + "Checkin in boss"
         #sendEmail(message)
-        time.sleep(seconds - ((time.time() - startTime) % seconds))
+        time.sleep(seconds)
 
 initMessage()
-periodicUpdates(10.0)
+periodicUpdates(30.0)
