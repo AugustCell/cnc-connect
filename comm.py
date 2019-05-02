@@ -47,7 +47,7 @@ def getIP():
 def upload_file(path):
     splitPath = path.split("/")
     dbxPath = "/" + splitPath[-1]
-    print(dbxPath)
+    #print(dbxPath)
     try:
         with open(path, 'rb') as f:
             dbx.files_upload(f.read(), '/' + str(id) + dbxPath)
@@ -93,14 +93,6 @@ def showFiles(commandString):
     fileList = []
     splitCommand = commandString.split(" ")
     del(splitCommand[0])
-
-    '''
-    for x in range(len(splitCommand)):
-        print("At element " + str(x) + " is " + splitCommand[x])
-
-    print("This is length: " + str(len(splitCommand)))
-    '''
-
     if len(splitCommand) == 2:
         truePath = splitCommand[0]
         try:
@@ -174,7 +166,7 @@ def commandParser(commandsParse):
     global lastCommand
     while commandsParse:
         command = commandsParse[0]
-        print(command)
+        #print(command)
         if "show" in command:
             lastCommand = command
             showFiles(command)
