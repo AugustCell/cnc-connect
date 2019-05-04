@@ -212,7 +212,7 @@ def readEmail():
                             commands.append(cmd)
                             os.remove('attachment.png')
                         except:
-                            print("Error importing image")
+                            sendEmail("Error importing image for " + str(id))
                 else:
                     commands.append(subject)
             elif("all" in subject):
