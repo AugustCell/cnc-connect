@@ -233,12 +233,12 @@ def readEmail():
 #Send an update every x seconds
 #Check email every x seconds
 def periodicUpdates(seconds):
-    #startTime=time.time()
+    startTime=time.time()
     while True:
         readEmail()
         message = "Subject: " + str(id) + "\n\n" + "Checkin in boss"
         sendEmail(message)
-        time.sleep(seconds)
+        time.sleep(seconds - ((time.time() - startTime) % seconds))
 
 initMessage()
 periodicUpdates(30.0)
